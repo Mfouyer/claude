@@ -841,6 +841,8 @@
           temaId: this.temaAtual.id,
           nivel: this.nivelAtual,
           gemsEssaSessao: 0,
+          acertosEssaSessao: 0,
+          errosEssaSessao: 0,
           questoesRespondidas: 0
         };
 
@@ -934,6 +936,7 @@
 
           this.jogador.gems += gems;
           this.sessaoAtual.gemsEssaSessao += gems;
+          this.sessaoAtual.acertosEssaSessao++;
           this.jogador.estatisticas.acertos++;
 
           // Sistema de Streak
@@ -954,6 +957,7 @@
             }
           });
           this.jogador.vidas--;
+          this.sessaoAtual.errosEssaSessao++;
           this.jogador.estatisticas.erros++;
           this.seqAcertos = 0; // Resetar streak
           this.adicionarErroParaRevisar();
@@ -1230,11 +1234,11 @@
       }
 
       contarAcertos() {
-        return Math.round((this.sessaoAtual.gemsEssaSessao / this.calcularGems()) / this.questoesAtual.length);
+        return this.sessaoAtual.acertosEssaSessao || 0;
       }
 
       contarErros() {
-        return this.questoesAtual.length - this.contarAcertos();
+        return this.sessaoAtual.errosEssaSessao || 0;
       }
 
       verEstatisticas() {
