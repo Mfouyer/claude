@@ -268,6 +268,55 @@
       border-collapse: collapse;
     }
 
+    .niveis-selector {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .niveis-selector h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .niveis-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .nivel-btn {
+      padding: 10px 20px;
+      border: 2px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .nivel-btn:hover:not(:disabled) {
+      background: #667eea;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .nivel-btn.ativo {
+      background: #667eea;
+      color: white;
+    }
+
+    .nivel-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-color: #ccc;
+      color: #ccc;
+    }
+
     /* Tela de Questões */
     .questao-container {
       background: #f5f5f5;
@@ -633,6 +682,12 @@
       <div id="telaConteudo" class="screen">
         <h2 id="conteudoTitulo"></h2>
         <div class="conteudo-box" id="conteudoBox"></div>
+
+        <div class="niveis-selector">
+          <h3>Escolhe o Nível de Dificuldade:</h3>
+          <div id="niveisContainer" class="niveis-buttons"></div>
+        </div>
+
         <div style="text-align: center;">
           <button onclick="game.irParaQuestoes()">Começar Questões! 💪</button>
           <button class="secondary" onclick="game.voltarAoMenu()">Voltar ao Menu</button>
@@ -822,6 +877,75 @@
         this.mostrarTela('telaConteudo');
         document.getElementById('conteudoTitulo').textContent = tema.nome;
         document.getElementById('conteudoBox').innerHTML = tema.conteudo;
+
+        // Renderizar seletor de dificuldade
+        this.renderizarSeletorDificuldade();
+      }
+
+      renderizarSeletorDificuldade() {
+        const container = document.getElementById('niveisContainer');
+        container.innerHTML = '';
+
+        const niveis = ['facil', 'medio', 'hard', 'pro'];
+        const labels = {
+          'facil': 'Fácil 😊',
+          'medio': 'Médio 😐',
+          'hard': 'Difícil 😤',
+          'pro': 'Pro 🔥'
+        };
+
+        const progresso = this.jogador.temasProgresso[this.temaAtual.id] || {};
+        const total = progresso.acertos + progresso.erros;
+        const percentual = total > 0 ? Math.round((progresso.acertos / total) * 100) : 0;
+
+        niveis.forEach((nivel, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'nivel-btn';
+          btn.textContent = labels[nivel];
+          btn.onclick = () => this.selecionarNivel(nivel);
+
+          // Verificar desbloqueamento
+          let desbloqueado = nivel === 'facil';
+
+          if (nivel === 'medio' && percentual >= 70) {
+            desbloqueado = true;
+          } else if (nivel === 'hard' && this.verificarDesbloqueioNivel('medio')) {
+            desbloqueado = true;
+          } else if (nivel === 'pro' && this.verificarDesbloqueioNivel('hard')) {
+            desbloqueado = true;
+          }
+
+          if (!desbloqueado) {
+            btn.disabled = true;
+          }
+
+          if (this.nivelAtual === nivel) {
+            btn.classList.add('ativo');
+          }
+
+          container.appendChild(btn);
+        });
+      }
+
+      verificarDesbloqueioNivel(nivelAntesior) {
+        const temasQueDesbloqueiamNivel = {
+          'medio': [1, 2, 3],
+          'hard': [4, 5, 6],
+          'pro': [7, 8, 9]
+        };
+
+        const temas = temasQueDesbloqueiamNivel[nivelAntesior] || [];
+        return temas.some(temaId => {
+          const prog = this.jogador.temasProgresso[temaId] || {};
+          const total = prog.acertos + prog.erros;
+          const percentual = total > 0 ? Math.round((prog.acertos / total) * 100) : 0;
+          return percentual >= 70;
+        });
+      }
+
+      selecionarNivel(nivel) {
+        this.nivelAtual = nivel;
+        this.renderizarSeletorDificuldade();
       }
 
       irParaQuestoes() {
