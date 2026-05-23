@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1226" />
+  <title>MatemáticaRoyale — Lucas</title>
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/screens.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div id="app" class="app-root">
+    <header id="hud" class="hud" hidden>
+      <button class="hud-back" id="hud-back" aria-label="Voltar ao menu">←</button>
+      <div class="hud-avatar" id="hud-avatar">🦸</div>
+      <div class="hud-stats">
+        <span class="hud-stat" title="Vidas"><span class="ico">❤️</span><span id="hud-lives">5</span></span>
+        <span class="hud-stat" title="V-Pontos"><span class="ico">💎</span><span id="hud-vpts">0</span></span>
+        <span class="hud-stat hud-xp" title="XP">
+          <span class="ico">⭐</span>
+          <span id="hud-level">Nível 1</span>
+          <span class="xp-bar"><span class="xp-fill" id="hud-xp-fill"></span></span>
+        </span>
+      </div>
+      <div class="hud-actions">
+        <button class="hud-btn" id="hud-shop" title="Loja">🛒</button>
+        <button class="hud-btn" id="hud-dashboard" title="Evolução">📊</button>
+        <button class="hud-btn" id="hud-recovery" title="Zona de Recuperação">
+          🚑<span class="badge" id="hud-recovery-badge" hidden>0</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="screen-host" class="screen-host">
+      <!-- Os ecrãs são montados dinamicamente aqui -->
+    </main>
+
+    <div id="toast-host" class="toast-host" aria-live="polite"></div>
+    <div id="modal-host" class="modal-host" hidden></div>
+  </div>
+
+  <!-- Dados (ordem importa: content antes de questões) -->
+  <script src="data/content.js"></script>
+  <script src="data/questions-t1.js"></script>
+  <script src="data/questions-t2.js"></script>
+  <script src="data/questions-t3.js"></script>
+  <script src="data/questions-t4.js"></script>
+  <script src="data/questions-t5.js"></script>
+  <script src="data/questions-t6.js"></script>
+  <script src="data/questions-t7.js"></script>
+
+  <!-- Núcleo -->
+  <script src="js/state.js"></script>
+  <script src="js/economy.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/powers.js"></script>
+  <script src="js/questions.js"></script>
+
+  <!-- Ecrãs -->
+  <script src="js/screens/splash.js"></script>
+  <script src="js/screens/menu.js"></script>
+  <script src="js/screens/content.js"></script>
+  <script src="js/screens/game.js"></script>
+  <script src="js/screens/recovery.js"></script>
+  <script src="js/screens/dashboard.js"></script>
+  <script src="js/screens/shop.js"></script>
+  <script src="js/screens/victory.js"></script>
+
+  <!-- Router + bootstrap -->
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

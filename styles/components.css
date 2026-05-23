@@ -1,0 +1,347 @@
+/* ============================
+   MatemáticaRoyale — components.css
+   HUD, botões, cards, modais, toast, heatmap
+   ============================ */
+
+/* ---------- HUD ---------- */
+.hud {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(180deg, rgba(15,18,38,0.95), rgba(15,18,38,0.85));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--c-line);
+  padding: 10px 12px;
+  margin: 0 -12px 12px;
+}
+.hud-back {
+  background: transparent;
+  border: 1px solid var(--c-line);
+  color: var(--c-text);
+  border-radius: var(--radius-sm);
+  width: 38px; height: 38px;
+  font-size: 1.2rem;
+  transition: background var(--t-fast);
+}
+.hud-back:hover { background: var(--c-card-hi); }
+
+.hud-avatar {
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  font-size: 1.6rem;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-2));
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  flex: 0 0 auto;
+}
+
+.hud-stats {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.hud-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.hud-stat .ico { font-size: 1rem; }
+.hud-xp {
+  min-width: 160px;
+}
+.xp-bar {
+  width: 80px; height: 6px;
+  background: var(--c-bg-3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-left: 4px;
+}
+.xp-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-accent), var(--c-accent-2));
+  transition: width var(--t-med);
+  width: 0%;
+}
+
+.hud-actions { display: flex; gap: 6px; }
+.hud-btn {
+  position: relative;
+  width: 38px; height: 38px;
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  color: var(--c-text);
+  border-radius: var(--radius-sm);
+  font-size: 1.1rem;
+  transition: background var(--t-fast), transform var(--t-fast);
+}
+.hud-btn:hover { background: var(--c-card-hi); transform: translateY(-1px); }
+.badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: var(--c-danger);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 5px;
+  min-width: 16px;
+  text-align: center;
+  border: 2px solid var(--c-bg);
+}
+
+@media (max-width: 640px) {
+  .hud-xp { display: none; }
+  .hud-avatar { width: 36px; height: 36px; font-size: 1.3rem; }
+}
+
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  color: var(--c-text);
+  padding: 11px 18px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: transform var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+  text-decoration: none;
+}
+.btn:hover { background: var(--c-card-hi); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-2));
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover { box-shadow: var(--shadow-md); background: linear-gradient(135deg, #7e8aff, #a884ff); }
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+  border-color: transparent;
+  color: #2a1500;
+}
+.btn-accent:hover { filter: brightness(1.05); }
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--c-danger), #d63d4f);
+  border-color: transparent;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--c-line);
+}
+
+.btn-block { width: 100%; }
+.btn-lg { padding: 14px 24px; font-size: 1.1rem; }
+
+/* ---------- Card ---------- */
+.card {
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.card-hover {
+  transition: transform var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
+  cursor: pointer;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--c-primary);
+}
+
+/* ---------- Toast ---------- */
+.toast-host {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  color: var(--c-text);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-weight: 600;
+  animation: pop var(--t-med);
+  pointer-events: auto;
+}
+.toast-success { border-color: var(--c-success); }
+.toast-error   { border-color: var(--c-danger); }
+.toast-info    { border-color: var(--c-info); }
+
+/* ---------- Modal ---------- */
+.modal-host {
+  position: fixed; inset: 0;
+  background: rgba(8, 9, 26, 0.7);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 100;
+  animation: fadein 0.2s ease;
+}
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: pop var(--t-med);
+}
+.modal h2 { margin-bottom: 12px; }
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Power-ups ---------- */
+.power-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 12px;
+  background: var(--c-bg-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-line);
+  margin-top: 14px;
+}
+.power-slot {
+  position: relative;
+  width: 56px; height: 56px;
+  background: var(--c-card);
+  border: 2px solid var(--c-line);
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: transform var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.power-slot:hover { transform: translateY(-2px); border-color: var(--c-accent); }
+.power-slot.disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(0.8); }
+.power-slot.disabled:hover { transform: none; border-color: var(--c-line); }
+.power-slot.used { border-color: var(--c-success); animation: glow 1s; }
+.power-count {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  background: var(--c-accent);
+  color: #2a1500;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 6px;
+  border: 2px solid var(--c-bg);
+}
+
+/* ---------- Heatmap (dashboard) ---------- */
+.heatmap {
+  display: grid;
+  grid-template-columns: 110px repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 12px;
+}
+.heat-cell {
+  background: var(--c-bg-3);
+  border-radius: 6px;
+  padding: 12px 6px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+}
+.heat-cell.header { background: transparent; color: var(--c-text-dim); }
+.heat-cell.label  { background: transparent; text-align: left; padding-left: 4px; }
+.heat-0  { background: #2a2f5e; color: var(--c-text-mute); }
+.heat-1  { background: #4d3d5f; color: var(--c-text); }
+.heat-2  { background: #6b4860; color: var(--c-text); }
+.heat-3  { background: #8f5256; color: var(--c-text); }
+.heat-4  { background: #ad6048; color: white; }
+.heat-5  { background: #c97c2f; color: white; }
+.heat-6  { background: #e0a02c; color: #2a1500; }
+.heat-7  { background: #3ddc97; color: #03301e; }
+
+/* ---------- Estado “locked” genérico ---------- */
+.locked {
+  opacity: 0.6;
+  filter: grayscale(0.4);
+  position: relative;
+}
+.locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 8px; right: 10px;
+  font-size: 1.4rem;
+}
+
+/* ---------- Vidas (corações) ---------- */
+.lives-display {
+  display: inline-flex;
+  gap: 4px;
+}
+.life-heart { font-size: 1.4rem; transition: transform var(--t-fast); }
+.life-heart.lost { filter: grayscale(1) opacity(0.35); }
+.life-heart.regen { animation: pop var(--t-slow); }
+
+/* ---------- Streak banner ---------- */
+.streak-banner {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff6b3d, #ffd83d);
+  color: #2a1500;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  animation: pop var(--t-med);
+}
+
+/* ---------- Cronómetro Pro ---------- */
+.timer-bar {
+  height: 6px;
+  background: var(--c-bg-3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0 14px;
+}
+.timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-success), var(--c-accent), var(--c-danger));
+  transition: width 1s linear;
+  width: 100%;
+}
