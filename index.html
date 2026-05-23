@@ -957,6 +957,14 @@
           this.jogador.estatisticas.erros++;
           this.seqAcertos = 0; // Resetar streak
           this.adicionarErroParaRevisar();
+
+          // Se atingiu 3 tentativas, avança automaticamente
+          if (this.tentativasQuestaoAtual >= 3) {
+            this.mostrarNotificacao('Limite de tentativas atingido! Próxima questão...', 'aviso');
+            setTimeout(() => this.proximaQuestao(), 2000);
+            return;
+          }
+
           this.mostrarResultado(false, 0);
         }
 
@@ -1047,10 +1055,25 @@
 
       obterPoderesDisponiveis() {
         const poderes = [];
-        const temasCompletados = Object.values(this.jogador.temasProgresso)
-          .filter(t => t.acertos > 0).length;
 
-        if (temasCompletados >= 1) { // Tema 1-3
+        // Verifica se completou algum tema dos grupos especificados
+        const tema1a3Completo = [1, 2, 3].some(id =>
+          this.jogador.temasProgresso[id] && this.jogador.temasProgresso[id].acertos > 0
+        );
+        const tema4a6Completo = [4, 5, 6].some(id =>
+          this.jogador.temasProgresso[id] && this.jogador.temasProgresso[id].acertos > 0
+        );
+        const tema7a9Completo = [7, 8, 9].some(id =>
+          this.jogador.temasProgresso[id] && this.jogador.temasProgresso[id].acertos > 0
+        );
+        const tema10a12Completo = [10, 11, 12].some(id =>
+          this.jogador.temasProgresso[id] && this.jogador.temasProgresso[id].acertos > 0
+        );
+        const tema13a15Completo = [13, 14, 15].some(id =>
+          this.jogador.temasProgresso[id] && this.jogador.temasProgresso[id].acertos > 0
+        );
+
+        if (tema1a3Completo) {
           poderes.push({
             tipo: 'dica',
             nome: 'Dica',
@@ -1060,7 +1083,7 @@
           });
         }
 
-        if (temasCompletados >= 4) { // Tema 4-6
+        if (tema4a6Completo) {
           poderes.push({
             tipo: '50x50',
             nome: '50/50',
@@ -1070,7 +1093,7 @@
           });
         }
 
-        if (temasCompletados >= 7) { // Tema 7-9
+        if (tema7a9Completo) {
           poderes.push({
             tipo: 'duplicador',
             nome: 'Duplicador',
@@ -1080,7 +1103,7 @@
           });
         }
 
-        if (temasCompletados >= 10) { // Tema 10-12
+        if (tema10a12Completo) {
           poderes.push({
             tipo: 'vidaextra',
             nome: 'Vida Extra',
@@ -1090,7 +1113,7 @@
           });
         }
 
-        if (temasCompletados >= 13) { // Tema 13-15
+        if (tema13a15Completo) {
           poderes.push({
             tipo: 'revisor',
             nome: 'Revisor',
@@ -1288,6 +1311,7 @@
         notif.style.background = {
           'sucesso': '#00cc44',
           'erro': '#ff0000',
+          'aviso': '#ffc107',
           'info': '#667eea'
         }[tipo] || '#667eea';
         notif.style.color = 'white';
