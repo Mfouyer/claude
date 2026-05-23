@@ -81,6 +81,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
     /* Tela Inicial */
     .screen-inicio h2 {
       color: #667eea;
@@ -321,6 +326,19 @@
       border-color: #ff0000;
       background: #ffe8e8;
       color: #660000;
+    }
+
+    .opcao.dica-revelada {
+      border-color: #00ff00;
+      background: #e8ffe8;
+      color: #006600;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+
+    .opcao.eliminada {
+      opacity: 0.3;
+      text-decoration: line-through;
+      cursor: not-allowed !important;
     }
 
     .explicacao {
@@ -826,6 +844,16 @@
           questoesRespondidas: 0
         };
 
+        // Inicializar poder-ups para esta sessão
+        this.poderDicaUsado = false;
+        this.poder50x50Usado = false;
+        this.poderDuplicadorUsado = false;
+        this.poderDuplicadorAtivo = false;
+        this.poderVidaExtraUsado = false;
+        this.poderRevisorUsado = false;
+        this.tentativasQuestaoAtual = 0;
+        this.seqAcertos = 0;
+
         this.mostrarTela('telaQuestoes');
         this.mostrarQuestao();
       }
@@ -839,6 +867,17 @@
         this.questaoAtual = this.questoesAtual[this.questaoIndex];
         this.respostaSelecionada = null;
 
+        // Inicializar contadores para esta questão
+        if (!this.tentativasQuestaoAtual) this.tentativasQuestaoAtual = 0;
+        this.tentativasQuestaoAtual++;
+
+        // Aplicar anti-padrão: usar variante se tentativa > 1
+        let perguntaAExibir = this.questaoAtual.pergunta;
+        if (this.tentativasQuestaoAtual > 1 && this.questaoAtual.variantes && this.questaoAtual.variantes.length > 0) {
+          const indexVariante = Math.min(this.tentativasQuestaoAtual - 2, this.questaoAtual.variantes.length - 1);
+          perguntaAExibir = this.questaoAtual.variantes[indexVariante].pergunta || perguntaAExibir;
+        }
+
         // Embaralhar opções
         const opcoes = [...this.questaoAtual.opcoes];
         const indiceCorreto = this.questaoAtual.respostaCorreta;
@@ -848,7 +887,7 @@
         // Atualizar pergunta
         document.getElementById('questaoNumero').textContent =
           `Questão ${this.questaoIndex + 1} de ${this.questoesAtual.length}`;
-        document.getElementById('questao').textContent = this.questaoAtual.pergunta;
+        document.getElementById('questao').textContent = perguntaAExibir;
 
         const opcoesDiv = document.getElementById('opcoes');
         opcoesDiv.innerHTML = '';
@@ -864,6 +903,9 @@
         document.getElementById('explicacao').classList.remove('show');
         document.getElementById('explicacao').innerHTML = '';
         document.getElementById('btnProxima').style.display = 'none';
+
+        // Renderizar power-ups disponíveis
+        this.renderizarPoderes();
 
         // Atualizar barra de progresso
         const percentual = Math.round((this.questaoIndex / this.questoesAtual.length) * 100);
@@ -881,10 +923,27 @@
         if (opcao === respostaCorreta) {
           // ACERTO
           opcoesDivs[index].classList.add('correta');
-          const gems = this.calcularGems();
+          let gems = this.calcularGems();
+
+          // Aplicar duplicador se ativo
+          if (this.poderDuplicadorAtivo) {
+            gems *= 2;
+            this.poderDuplicadorAtivo = false;
+            this.mostrarNotificacao('Duplicador Ativado! 2x Gems 💎', 'sucesso');
+          }
+
           this.jogador.gems += gems;
           this.sessaoAtual.gemsEssaSessao += gems;
           this.jogador.estatisticas.acertos++;
+
+          // Sistema de Streak
+          if (!this.seqAcertos) this.seqAcertos = 0;
+          this.seqAcertos++;
+          if (this.seqAcertos % 5 === 0 && this.jogador.vidas < 5) {
+            this.jogador.vidas++;
+            this.mostrarNotificacao(`Streak de ${this.seqAcertos}! +1 Vida ❤️`, 'sucesso');
+          }
+
           this.mostrarResultado(true, gems);
         } else {
           // ERRO
@@ -896,6 +955,7 @@
           });
           this.jogador.vidas--;
           this.jogador.estatisticas.erros++;
+          this.seqAcertos = 0; // Resetar streak
           this.adicionarErroParaRevisar();
           this.mostrarResultado(false, 0);
         }
@@ -954,7 +1014,182 @@
         }
 
         this.questaoIndex++;
+        this.tentativasQuestaoAtual = 0; // Resetar tentativas para nova questão
         this.mostrarQuestao();
+      }
+
+      renderizarPoderes() {
+        const container = document.getElementById('powerups');
+        container.innerHTML = '';
+
+        const poderesDisponiveis = this.obterPoderesDisponiveis();
+
+        if (poderesDisponiveis.length === 0) {
+          return; // Sem poderes disponíveis
+        }
+
+        poderesDisponiveis.forEach(poder => {
+          const btn = document.createElement('button');
+          btn.className = 'powerup-btn';
+          btn.textContent = poder.nome + ' ' + poder.emoji;
+          btn.title = poder.descricao;
+
+          if (poder.usado) {
+            btn.disabled = true;
+            btn.classList.add('usado');
+          } else {
+            btn.onclick = () => this.usarPoder(poder.tipo);
+          }
+
+          container.appendChild(btn);
+        });
+      }
+
+      obterPoderesDisponiveis() {
+        const poderes = [];
+        const temasCompletados = Object.values(this.jogador.temasProgresso)
+          .filter(t => t.acertos > 0).length;
+
+        if (temasCompletados >= 1) { // Tema 1-3
+          poderes.push({
+            tipo: 'dica',
+            nome: 'Dica',
+            emoji: '💡',
+            descricao: 'Revela a resposta correta',
+            usado: this.poderDicaUsado
+          });
+        }
+
+        if (temasCompletados >= 4) { // Tema 4-6
+          poderes.push({
+            tipo: '50x50',
+            nome: '50/50',
+            emoji: '✂️',
+            descricao: 'Elimina 2 respostas erradas',
+            usado: this.poder50x50Usado
+          });
+        }
+
+        if (temasCompletados >= 7) { // Tema 7-9
+          poderes.push({
+            tipo: 'duplicador',
+            nome: 'Duplicador',
+            emoji: '2️⃣',
+            descricao: 'Próxima resposta correta = 2x gems',
+            usado: this.poderDuplicadorUsado
+          });
+        }
+
+        if (temasCompletados >= 10) { // Tema 10-12
+          poderes.push({
+            tipo: 'vidaextra',
+            nome: 'Vida Extra',
+            emoji: '❤️',
+            descricao: 'Restaura 1 vida',
+            usado: this.poderVidaExtraUsado
+          });
+        }
+
+        if (temasCompletados >= 13) { // Tema 13-15
+          poderes.push({
+            tipo: 'revisor',
+            nome: 'Revisor',
+            emoji: '🔍',
+            descricao: 'Explicação detalhada',
+            usado: this.poderRevisorUsado
+          });
+        }
+
+        return poderes;
+      }
+
+      usarPoder(tipo) {
+        switch (tipo) {
+          case 'dica':
+            this.usarDica();
+            break;
+          case '50x50':
+            this.usar50x50();
+            break;
+          case 'duplicador':
+            this.usarDuplicador();
+            break;
+          case 'vidaextra':
+            this.usarVidaExtra();
+            break;
+          case 'revisor':
+            this.usarRevisor();
+            break;
+        }
+        this.renderizarPoderes();
+      }
+
+      usarDica() {
+        const opcoesDivs = document.querySelectorAll('.opcao');
+        const opcoes = Array.from(opcoesDivs).map(div => div.textContent);
+        const respostaCorreta = this.questaoAtual.opcoes[this.questaoAtual.respostaCorreta];
+        const indiceCorreto = opcoes.findIndex(opt => opt === respostaCorreta);
+
+        if (indiceCorreto !== -1) {
+          opcoesDivs[indiceCorreto].classList.add('dica-revelada');
+          opcoesDivs[indiceCorreto].style.animation = 'pulse 0.6s ease-in-out';
+          this.mostrarNotificacao('Dica Revelada! 💡', 'sucesso');
+        } else {
+          this.mostrarNotificacao('Erro ao aplicar dica!', 'erro');
+        }
+
+        this.poderDicaUsado = true;
+      }
+
+      usar50x50() {
+        const opcoesDivs = document.querySelectorAll('.opcao');
+        const opcoes = Array.from(opcoesDivs).map(div => div.textContent);
+        const respostaCorreta = this.questaoAtual.opcoes[this.questaoAtual.respostaCorreta];
+        const indiceCorreto = opcoes.findIndex(opt => opt === respostaCorreta);
+
+        const indices = Array.from({ length: opcoes.length }, (_, i) => i)
+          .filter(i => i !== indiceCorreto);
+        const aRemover = indices.sort(() => Math.random() - 0.5).slice(0, Math.min(2, indices.length));
+
+        aRemover.forEach(i => {
+          if (!opcoesDivs[i].classList.contains('eliminada')) {
+            opcoesDivs[i].classList.add('eliminada');
+            opcoesDivs[i].style.pointerEvents = 'none';
+            opcoesDivs[i].style.opacity = '0.3';
+          }
+        });
+
+        this.mostrarNotificacao('50/50 Ativado! ✂️', 'sucesso');
+        this.poder50x50Usado = true;
+      }
+
+      usarDuplicador() {
+        this.poderDuplicadorAtivo = true;
+        this.mostrarNotificacao('Duplicador Ativado! Próxima resposta correta = 2x Gems 2️⃣', 'sucesso');
+        this.poderDuplicadorUsado = true;
+      }
+
+      usarVidaExtra() {
+        if (this.jogador.vidas < 5) {
+          this.jogador.vidas++;
+          this.mostrarNotificacao('Vida Extra Adicionada! ❤️', 'sucesso');
+          this.atualizarHeaderStats();
+        } else {
+          this.mostrarNotificacao('Vidas no máximo! ❌', 'erro');
+          return;
+        }
+        this.poderVidaExtraUsado = true;
+      }
+
+      usarRevisor() {
+        const explicacao = document.getElementById('explicacao');
+        if (explicacao) {
+          const textoDetalhado = `<strong>Explicação Detalhada:</strong><br>${this.questaoAtual.explicacao}`;
+          explicacao.innerHTML = textoDetalhado;
+          explicacao.classList.add('show');
+          this.mostrarNotificacao('Revisor Ativado! 🔍', 'sucesso');
+        }
+        this.poderRevisorUsado = true;
       }
 
       finalizarSessao() {
