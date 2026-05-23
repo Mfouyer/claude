@@ -7,6 +7,7 @@
 
   const LIFE_REGEN_MS = 8 * 60 * 1000; // 1 vida a cada 8 min
   const XP_PER_LEVEL = 200;
+  const MED_KIT_PRICE = 80; // 80 💎 — recupera 5/5 vidas
 
   const SKINS_BY_LEVEL = {
     2: { id: "predador", icon: "🦊", name: "Lucas Predador" },
@@ -116,6 +117,16 @@
     return all[skinId] || all.default;
   }
 
+  function buyMedKit() {
+    const p = State.getProfile();
+    if (p.vPoints < MED_KIT_PRICE) return { ok: false, reason: "V-Pontos insuficientes." };
+    p.vPoints -= MED_KIT_PRICE;
+    p.lives = p.maxLives;
+    p.lastLifeRegenTs = Date.now();
+    State.save();
+    return { ok: true };
+  }
+
   function streakBonus(streak) {
     // +V-Pts bónus se atingir certas streaks
     if (streak === 3) return { vpts: 5, label: "Em Chamas 🔥" };
@@ -126,9 +137,10 @@
 
   // Esta API é consumida pelo router e pelas screens
   window.Economy = {
-    LIFE_REGEN_MS, XP_PER_LEVEL, SKINS_BY_LEVEL, SHOP_SKINS,
+    LIFE_REGEN_MS, XP_PER_LEVEL, MED_KIT_PRICE, SKINS_BY_LEVEL, SHOP_SKINS,
     regenLives, loseLife, gainLife, restoreAllLives, msUntilNextLife,
     addVPoints, spendVPoints,
+    buyMedKit,
     addXP, xpProgress,
     skinIcon, streakBonus
   };

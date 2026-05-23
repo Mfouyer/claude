@@ -309,7 +309,7 @@
       if (!ctx._noLifeLoss) {
         Economy.loseLife();
         if (State.getProfile().lives === 0) {
-          Router.toast("💔 Sem vidas! Espera que regenerem ou usa um Med Kit.", "error");
+          // Última vida perdida — não fazer toast, abrimos modal directo em showFeedback
         }
       }
       Economy.addXP(5); // bónus consolação
@@ -319,6 +319,69 @@
 
     // Feedback
     showFeedback(host, ctx, correct);
+  }
+
+  function showMedKitModal(host, ctx) {
+    const p = State.getProfile();
+    const canAfford = p.vPoints >= Economy.MED_KIT_PRICE;
+    // Determina se este ctx já tem uma sessão de jogo a correr (tem materialized)
+    // ou se vem do ecrã de entrada (sem sessão real iniciada)
+    const isActiveGame = !!(ctx.materialized !== undefined);
+
+    Router.modal({
+      title: "💉 Med Kit de Emergência",
+      body: `
+        <span class="medkit-icon">💉</span>
+        <p style="text-align:center;margin-bottom:12px;">Ficaste sem vidas! O Med Kit recupera <strong>5/5 vidas</strong> e permite continuar imediatamente.</p>
+        <div style="text-align:center;margin-bottom:8px;">
+          <span class="medkit-price-tag">💎 ${Economy.MED_KIT_PRICE} V-Pontos</span>
+        </div>
+        <p style="text-align:center;font-size:0.88rem;color:var(--c-text-dim);">Tens agora: ${p.vPoints} 💎</p>
+      `,
+      extraClass: "modal-medkit",
+      buttons: [
+        canAfford
+          ? { label: "💉 Usar Med Kit — continuar!", cls: "btn-medkit", onClick: () => {
+              const r = Economy.buyMedKit();
+              if (r.ok) {
+                Router.toast("💉 Med Kit usado! Vidas restauradas.", "success");
+                Router.HUD.update();
+                if (isActiveGame) {
+                  // Continuar a pergunta actual (avança para próxima)
+                  // ctx.index já foi incrementado antes de chamar showMedKitModal a partir de advance
+                  if (ctx.index >= ctx.queue.length) {
+                    finishLevel(ctx);
+                  } else {
+                    nextQuestion(host, ctx);
+                  }
+                } else {
+                  // Vinha de render sem vidas — reinicia o jogo normalmente
+                  Router.navigate("game", {
+                    themeId: ctx.themeId, level: ctx.level,
+                    queue: ctx.queue, resumeIndex: ctx.index
+                  });
+                }
+              } else {
+                Router.toast(r.reason, "error");
+              }
+            }}
+          : { label: "💎 V-Pontos insuficientes", cls: "btn-ghost", disabled: true },
+        { label: "🛒 Visitar Loja", cls: "btn-accent", onClick: () => {
+            if (ctx.themeId && ctx.queue && ctx.queue.length > 0) {
+              State.setSession({ themeId: ctx.themeId, level: ctx.level, index: ctx.index, queue: ctx.queue }, "game");
+            }
+            Router.navigate("shop");
+          }
+        },
+        { label: "🗺️ Ir ao Mapa", cls: "btn-ghost", onClick: () => {
+            if (ctx.themeId && ctx.queue && ctx.queue.length > 0) {
+              State.setSession({ themeId: ctx.themeId, level: ctx.level, index: ctx.index, queue: ctx.queue }, "game");
+            }
+            Router.navigate("menu");
+          }
+        }
+      ]
+    });
   }
 
   function showFeedback(host, ctx, correct) {
@@ -331,7 +394,29 @@
     `;
     fb.appendChild(div);
 
+    const livesAfter = State.getProfile().lives;
     const next = host.querySelector("#next-q");
+
+    // Sem vidas após erro: abre modal Med Kit directamente sem esperar "Próxima"
+    if (!correct && livesAfter === 0) {
+      // Incrementar index agora (equivalente ao que advance faria)
+      ctx.index += 1;
+      let medkitModalOpened = false;
+      function openMedKit() {
+        if (medkitModalOpened) return;
+        medkitModalOpened = true;
+        showMedKitModal(host, ctx);
+      }
+      next.hidden = false;
+      next.textContent = "💉 Med Kit →";
+      next.classList.add("btn-medkit");
+      next.focus();
+      next.addEventListener("click", openMedKit, { once: true });
+      // Abre automaticamente após breve pausa para o jogador ver o feedback
+      setTimeout(openMedKit, 900);
+      return;
+    }
+
     next.hidden = false;
     next.focus();
     next.addEventListener("click", () => advance(host, ctx), { once: true });
@@ -340,24 +425,9 @@
   function advance(host, ctx) {
     ctx.index += 1;
     if (State.getProfile().lives === 0) {
-      // Sem vidas: forçar a sair
+      // Sem vidas: abrir modal Med Kit (já foi salvo o estado se vier de showMedKitModal)
       clearTimer();
-      const ms = Economy.msUntilNextLife();
-      const mins = Math.ceil(ms / 60000);
-      Router.modal({
-        title: "💔 Ficaste sem vidas!",
-        body: `<p>A próxima vida regenera em cerca de <strong>${mins} min</strong>. Podes voltar mais tarde ou comprar Med Kits na loja.</p>`,
-        buttons: [
-          { label: "Ir para o Mapa", cls: "btn-ghost", onClick: () => {
-            State.setSession({
-              themeId: ctx.themeId, level: ctx.level,
-              index: ctx.index, queue: ctx.queue
-            }, "game");
-            Router.navigate("menu");
-          }},
-          { label: "Visitar Loja 🛒", cls: "btn-accent", onClick: () => Router.navigate("shop") }
-        ]
-      });
+      showMedKitModal(host, ctx);
       return;
     }
     if (ctx.index >= ctx.queue.length) {
@@ -413,16 +483,14 @@
     // Verificar vidas
     Economy.regenLives();
     if (State.getProfile().lives === 0) {
-      const ms = Economy.msUntilNextLife();
-      const mins = Math.ceil(ms / 60000);
-      Router.modal({
-        title: "💔 Sem vidas!",
-        body: `<p>Espera ${mins} min até a próxima vida regenerar, ou compra Med Kits na loja.</p>`,
-        buttons: [
-          { label: "Voltar ao Mapa", cls: "btn-ghost", onClick: () => Router.navigate("menu") },
-          { label: "Visitar Loja", cls: "btn-accent", onClick: () => Router.navigate("shop") }
-        ]
-      });
+      // Usar um ctx temporário para o modal Med Kit (com os params passados)
+      const tempCtx = {
+        themeId: params ? params.themeId : null,
+        level: params ? params.level : null,
+        index: params ? (params.resumeIndex || 0) : 0,
+        queue: params ? (params.queue || []) : []
+      };
+      showMedKitModal(host, tempCtx);
       return;
     }
 

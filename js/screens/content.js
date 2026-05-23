@@ -12,7 +12,14 @@
     pro:   { name: "Pro",   icon: "🏆", desc: "Com cronómetro! Só para os melhores." }
   };
 
+  // Limpar cena 3D anterior se existir
+  let _scene3d = null;
+  function destroyScene() {
+    if (_scene3d) { _scene3d.destroy(); _scene3d = null; }
+  }
+
   function render(host, params) {
+    destroyScene();
     const t = CONTENT.byId(params.themeId);
     if (!t) {
       Router.toast("Tema não encontrado.", "error");
@@ -64,6 +71,8 @@
           <h1>${t.name}</h1>
           <p>${t.paginas} — Areal Editores</p>
         </div>
+        <!-- Ilustração 3D: montada via JS após render -->
+        <div class="scene-3d-wrap" id="scene3d-mount"></div>
         <article class="content-section">${t.intro}</article>
         ${sections}
         <article class="content-section">
@@ -91,9 +100,18 @@
       });
     });
 
+    // Ilustração 3D
+    const mountEl = host.querySelector("#scene3d-mount");
+    if (mountEl && typeof Scene3D !== "undefined") {
+      // Pequeno delay para garantir que o container tem dimensões
+      requestAnimationFrame(() => {
+        _scene3d = Scene3D.mount(mountEl, t.id);
+      });
+    }
+
     // Scroll para o topo
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  window.Screens.content = { render };
+  window.Screens.content = { render, _destroyScene: destroyScene };
 })();

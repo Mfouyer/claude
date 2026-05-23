@@ -1,84 +1,123 @@
 /* ============================
    MatemáticaRoyale — base.css
-   Reset + tipografia + variáveis
+   Reset + tipografia + variáveis (cyberpunk/futurista)
    ============================ */
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
 :root {
-  /* Paleta inspirada em Fortnite (azul-noite + roxo + amarelo neon) */
-  --c-bg:        #0f1226;
-  --c-bg-2:      #181c3a;
-  --c-bg-3:      #232855;
-  --c-card:      #1f2347;
-  --c-card-hi:   #2a2f5e;
-  --c-line:      #3a3f74;
+  /* Paleta cyberpunk */
+  --c-bg:        #05060f;
+  --c-bg-2:      #0a0b1e;
+  --c-bg-3:      #0f1228;
 
-  --c-text:      #f4f5ff;
-  --c-text-dim:  #b8bce0;
-  --c-text-mute: #7a80b0;
+  --c-card:      rgba(15, 18, 38, 0.75);
+  --c-card-hi:   rgba(22, 26, 54, 0.90);
+  --c-line:      rgba(0, 240, 255, 0.12);
+  --c-line-hi:   rgba(0, 240, 255, 0.30);
 
-  --c-primary:   #6f7bff;   /* azul-roxo principal */
-  --c-primary-2: #9b6cff;
-  --c-accent:    #ffd83d;   /* amarelo neon */
-  --c-accent-2:  #ff9e3d;   /* laranja */
-  --c-success:   #3ddc97;
-  --c-danger:    #ff5b6e;
-  --c-info:      #45c4ff;
+  --c-text:      #e8eeff;
+  --c-text-dim:  #8fa0c8;
+  --c-text-mute: #4a5580;
 
-  --c-life:      #ff5b6e;
-  --c-vpts:      #45c4ff;
-  --c-xp:        #ffd83d;
+  /* Neons */
+  --c-cyan:      #00f0ff;
+  --c-magenta:   #ff00d4;
+  --c-lime:      #a3ff12;
 
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.45);
+  /* Roles */
+  --c-primary:   #4d6fff;
+  --c-primary-2: #8b5cf6;
+  --c-accent:    #00f0ff;   /* cyan neon */
+  --c-accent-2:  #ff00d4;   /* magenta neon */
+  --c-success:   #a3ff12;   /* lime neon */
+  --c-danger:    #ff2d55;
+  --c-info:      #00f0ff;
 
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
+  --c-life:      #ff2d55;
+  --c-vpts:      #00f0ff;
+  --c-xp:        #a3ff12;
 
-  --font-base: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
-  --font-display: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+  /* Shadows com glow neon */
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md:   0 6px 24px rgba(0, 0, 0, 0.6);
+  --shadow-lg:   0 14px 48px rgba(0, 0, 0, 0.7);
+  --glow-cyan:   0 0 12px rgba(0, 240, 255, 0.5), 0 0 40px rgba(0, 240, 255, 0.15);
+  --glow-magenta:0 0 12px rgba(255, 0, 212, 0.5), 0 0 40px rgba(255, 0, 212, 0.15);
+  --glow-lime:   0 0 12px rgba(163, 255, 18, 0.5), 0 0 40px rgba(163, 255, 18, 0.15);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* Fontes cyberpunk */
+  --font-base:    "Rajdhani", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Orbitron", "Trebuchet MS", Arial, sans-serif;
+  --font-mono:    "JetBrains Mono", "Courier New", monospace;
 
   --t-fast: 120ms ease;
   --t-med:  250ms ease;
   --t-slow: 450ms cubic-bezier(.2,.8,.2,1);
 }
 
+/* Fundo base com scanline sutil */
 html, body {
-  background: radial-gradient(circle at 20% 10%, #1c2154 0%, #0f1226 55%, #08091a 100%);
+  background-color: var(--c-bg);
+  background-image:
+    radial-gradient(ellipse at 15% 5%, rgba(77, 111, 255, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 90%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 240, 255, 0.04) 0%, transparent 70%);
   color: var(--c-text);
   font-family: var(--font-base);
   font-size: 16px;
-  line-height: 1.45;
+  font-weight: 500;
+  line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
+/* Scanline overlay sutil */
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
   margin: 0 0 0.5em 0;
   color: var(--c-text);
 }
 h1 { font-size: 2rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.2rem; }
-h4 { font-size: 1rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.1rem; }
+h4 { font-size: 0.95rem; }
 
 p { margin: 0 0 0.7em 0; }
-strong { color: var(--c-accent); }
+strong { color: var(--c-cyan); font-weight: 700; }
 em { color: var(--c-text-dim); font-style: normal; }
 
 ul, ol { margin: 0 0 0.7em 1.2em; padding: 0; }
-li { margin-bottom: 0.25em; }
+li { margin-bottom: 0.3em; }
 
-button { font: inherit; cursor: pointer; }
-button:disabled { cursor: not-allowed; opacity: 0.55; }
+button { font: inherit; cursor: pointer; font-family: var(--font-base); font-weight: 600; }
+button:disabled { cursor: not-allowed; opacity: 0.4; }
+
+code, .mono { font-family: var(--font-mono); }
 
 .app-root {
   display: flex;
@@ -86,7 +125,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   min-height: 100vh;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 12px 24px;
+  padding: 0 12px 32px;
 }
 
 .screen-host {
@@ -96,36 +135,68 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 /* Acessibilidade */
 :focus-visible {
-  outline: 3px solid var(--c-accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--c-cyan);
+  outline-offset: 3px;
   border-radius: 6px;
 }
 
 [hidden] { display: none !important; }
 
-/* Animação universal de entrada */
+/* ============================================================
+   ANIMAÇÕES CYBERPUNK
+   ============================================================ */
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes pop {
-  0%   { transform: scale(0.9); opacity: 0; }
-  60%  { transform: scale(1.04); opacity: 1; }
+  0%   { transform: scale(0.88); opacity: 0; }
+  60%  { transform: scale(1.05); opacity: 1; }
   100% { transform: scale(1); }
 }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
 }
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 0px var(--c-accent); }
-  50% { box-shadow: 0 0 22px var(--c-accent); }
+  0%, 100% { box-shadow: 0 0 4px var(--c-cyan), 0 0 0px transparent; }
+  50%       { box-shadow: var(--glow-cyan); }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+@keyframes flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96%, 98%      { opacity: 0.7; }
+  97%           { opacity: 0.5; }
+}
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scan-line {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+@keyframes neon-border {
+  0%, 100% { border-color: rgba(0, 240, 255, 0.25); }
+  50%       { border-color: rgba(0, 240, 255, 0.65); }
 }
 
-/* Responsividade */
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
 @media (max-width: 640px) {
   html, body { font-size: 15px; }
-  h1 { font-size: 1.7rem; }
-  h2 { font-size: 1.3rem; }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.2rem; }
+  h3 { font-size: 1rem; }
+}
+@media (max-width: 380px) {
+  html, body { font-size: 14px; }
+  .app-root { padding: 0 8px 24px; }
 }

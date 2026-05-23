@@ -18,6 +18,10 @@
     currentParams = params || null;
     const h = host();
     if (!h) return;
+    // Limpar cena 3D se existir antes de trocar de ecrã
+    if (window.Scene3D && typeof window.Screens.content._destroyScene === "function") {
+      window.Screens.content._destroyScene();
+    }
     h.innerHTML = "";
     HUD.update();
     HUD.toggle(name !== "splash");
@@ -93,7 +97,7 @@
     host.innerHTML = "";
     host.hidden = false;
     const dial = document.createElement("div");
-    dial.className = "modal";
+    dial.className = "modal" + (opts.extraClass ? " " + opts.extraClass : "");
     dial.innerHTML = `
       <h2>${opts.title || ""}</h2>
       <div>${opts.body || ""}</div>
@@ -104,7 +108,11 @@
       const btn = document.createElement("button");
       btn.className = "btn " + (b.cls || "btn-ghost");
       btn.textContent = b.label;
+      if (b.disabled) {
+        btn.disabled = true;
+      }
       btn.addEventListener("click", () => {
+        if (btn.disabled) return;
         close();
         if (typeof b.onClick === "function") b.onClick();
       });

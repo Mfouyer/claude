@@ -50,18 +50,47 @@
         <h1>🛒 Loja</h1>
         <p>Tens <strong>${p.vPoints} 💎 V-Pontos</strong>. Atualmente como <strong>${skinsCurrent.icon} ${skinsCurrent.name}</strong>.</p>
 
-        <h2 style="margin-top:18px">⚡ Poderes-Dica</h2>
+        <h2 style="margin-top:20px">💉 Consumíveis</h2>
+        <p style="color:var(--c-text-dim)">Itens de emergência para quando mais precisas.</p>
+        <div class="shop-grid">
+          <div class="shop-item medkit-item">
+            <div class="ico">💉</div>
+            <div class="name">Med Kit de Emergência</div>
+            <div class="desc">Recupera todas as 5 vidas instantaneamente. Usar na loja ou quando ficares sem vidas.</div>
+            <div class="price">💎 ${Economy.MED_KIT_PRICE} V-Pontos</div>
+            <button class="btn btn-medkit buy-medkit" ${p.vPoints < Economy.MED_KIT_PRICE ? "disabled" : ""}>
+              💉 Comprar Med Kit
+            </button>
+          </div>
+        </div>
+
+        <h2 style="margin-top:20px">⚡ Poderes-Dica</h2>
         <p style="color:var(--c-text-dim)">Compra poderes para usar quando estiveres encravado numa pergunta!</p>
         <div class="shop-grid">${powers}</div>
 
-        <h2 style="margin-top:18px">🦸 Skins (Aparência do Lucas)</h2>
+        <h2 style="margin-top:20px">🦸 Skins (Aparência do Lucas)</h2>
         <div class="shop-grid">${skinsOwned}${skinsForSale}</div>
 
-        <div style="margin-top:20px;text-align:center">
-          <button class="btn btn-primary" id="shop-back">← Voltar ao Mapa</button>
+        <div style="margin-top:24px;text-align:center">
+          <button class="btn btn-ghost" id="shop-back">← Voltar ao Mapa</button>
         </div>
       </section>
     `;
+
+    // Med Kit
+    const medkitBtn = host.querySelector(".buy-medkit");
+    if (medkitBtn) {
+      medkitBtn.addEventListener("click", () => {
+        const r = Economy.buyMedKit();
+        if (r.ok) {
+          Router.toast("💉 Med Kit usado! Vidas recuperadas.", "success");
+          Router.HUD.update();
+          render(host); // refresh
+        } else {
+          Router.toast(r.reason || "Não foi possível.", "error");
+        }
+      });
+    }
 
     host.querySelectorAll(".buy-power").forEach(btn => {
       btn.addEventListener("click", () => {
