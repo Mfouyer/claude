@@ -120,6 +120,17 @@
       });
     },
 
+    // Sincroniza commitments do jogador em users/{username}.commitments
+    syncCommitments: function (username, commitments) {
+      if (!isReady() || !username) return;
+      var s = sdk();
+      var d = db();
+      var docRef = s.doc(d, "users", username);
+      s.updateDoc(docRef, { commitments: commitments }).catch(function (err) {
+        console.warn("[FirebaseSync] Erro ao sincronizar commitments:", err);
+      });
+    },
+
     // Agrega sessões e escreve progress/{username}
     syncProgress: function (username) {
       if (!isReady() || !username) return Promise.resolve();

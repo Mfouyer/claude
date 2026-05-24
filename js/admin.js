@@ -22,32 +22,6 @@
     return days % 1 === 0 ? String(days) : days.toFixed(1).replace(".", ",");
   }
 
-  function buildAdminCommitmentsSection() {
-    var raw = null;
-    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) {}
-    var commitments = { livros: 0, consola: 0, telemovel: 0 };
-    if (raw) {
-      try {
-        var state = JSON.parse(raw);
-        if (state && state.profile && state.profile.commitments) {
-          commitments = Object.assign({}, commitments, state.profile.commitments);
-        }
-      } catch (e) {}
-    }
-    var allZero = commitments.livros === 0 && commitments.consola === 0 && commitments.telemovel === 0;
-    var bodyHTML = "";
-    if (allZero) {
-      bodyHTML = '<p class="admin-empty">Nenhum compromisso registado ainda.</p>';
-    } else {
-      var lines = [];
-      if (commitments.livros > 0) lines.push('<div class="player-stat-row"><span>📚 Livros para ler</span><span class="player-stat-val">' + commitments.livros + '</span></div>');
-      if (commitments.consola > 0) lines.push('<div class="player-stat-row"><span>🎮 Dias sem consola</span><span class="player-stat-val">' + halfDaysToText(commitments.consola) + '</span></div>');
-      if (commitments.telemovel > 0) lines.push('<div class="player-stat-row"><span>📵 Dias sem telemóvel</span><span class="player-stat-val">' + halfDaysToText(commitments.telemovel) + '</span></div>');
-      bodyHTML = '<div style="max-width:360px;">' + lines.join("") + '</div>';
-    }
-    return '<div class="admin-section"><div class="admin-section-title">📋 Compromissos do Lucas</div>' + bodyHTML + '</div>';
-  }
-
   function fmtTime(seconds) {
     if (!seconds) return "0m";
     var h = Math.floor(seconds / 3600);
@@ -289,7 +263,6 @@
           <div class="admin-section-title">Detalhe — ${selectedPlayer}</div>
           ${detailHTML}
         </div>` : ""}
-        ${buildAdminCommitmentsSection()}
         <div class="admin-section">
           <div class="admin-section-title">Ações</div>
           <button class="btn btn-ghost" id="btn-change-pin">🔑 Alterar PIN do Pai</button>
@@ -408,6 +381,21 @@
             </table>
           </div>
         </div>` : '<p class="admin-empty">Sem sessões registadas.</p>'}
+
+        ${(function () {
+          var comm = u.commitments || { livros: 0, consola: 0, telemovel: 0 };
+          var commAllZero = !comm.livros && !comm.consola && !comm.telemovel;
+          var commHTML = commAllZero
+            ? '<p class="admin-empty">Nenhum compromisso registado ainda.</p>'
+            : (function () {
+                var lines = [];
+                if (comm.livros > 0) lines.push('<div class="player-stat-row"><span>📚 Livros para ler</span><span class="player-stat-val">' + comm.livros + '</span></div>');
+                if (comm.consola > 0) lines.push('<div class="player-stat-row"><span>🎮 Dias sem consola</span><span class="player-stat-val">' + halfDaysToText(comm.consola) + '</span></div>');
+                if (comm.telemovel > 0) lines.push('<div class="player-stat-row"><span>📵 Dias sem telemóvel</span><span class="player-stat-val">' + halfDaysToText(comm.telemovel) + '</span></div>');
+                return '<div style="max-width:360px;">' + lines.join("") + '</div>';
+              })();
+          return '<div style="margin-bottom:18px;"><div class="admin-section-title" style="margin-bottom:10px;">📋 Compromissos</div>' + commHTML + '</div>';
+        })()}
       </div>
     `;
   }

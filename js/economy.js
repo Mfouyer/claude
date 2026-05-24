@@ -132,6 +132,13 @@
     if (!p.commitments) p.commitments = { livros: 0, consola: 0, telemovel: 0 };
     p.commitments[type] = (p.commitments[type] || 0) + 1;
     State.save();
+    // Sincronizar com Firebase se disponível
+    if (window.FirebaseAuth && window.FirebaseSync) {
+      var currentUser = FirebaseAuth.currentUser();
+      if (currentUser && currentUser.username) {
+        FirebaseSync.syncCommitments(currentUser.username, State.getProfile().commitments);
+      }
+    }
   }
 
   function streakBonus(streak) {
