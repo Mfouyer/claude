@@ -719,6 +719,201 @@
   font-size: 0.92rem;
 }
 
+/* ---------- Leaderboard ---------- */
+.leaderboard-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px 32px;
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.leaderboard-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.leaderboard-back {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+}
+
+.leaderboard-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 60%, var(--c-lime) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 6px;
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
+}
+
+.leaderboard-sub {
+  color: var(--c-text-dim);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.leaderboard-body {
+  width: 100%;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leaderboard-entry {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--c-card);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+  transition: border-color var(--t-med), box-shadow var(--t-med);
+}
+
+.leaderboard-entry.top3 {
+  border-color: rgba(255, 215, 0, 0.35);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(15, 18, 38, 0.85));
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.12);
+}
+
+.leaderboard-entry:hover {
+  border-color: var(--c-line-hi);
+  box-shadow: var(--shadow-sm);
+}
+
+.leaderboard-rank {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--c-text-dim);
+  text-align: center;
+  min-width: 40px;
+}
+
+.leaderboard-rank.gold {
+  font-size: 1.4rem;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.leaderboard-name {
+  font-family: var(--font-base);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-text);
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-score {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--c-cyan);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+  white-space: nowrap;
+}
+
+.leaderboard-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--c-text-mute);
+  white-space: nowrap;
+}
+
+.leaderboard-empty,
+.leaderboard-loading {
+  list-style: none;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--c-text-dim);
+  font-size: 0.95rem;
+}
+
+.leaderboard-offline {
+  color: var(--c-text-mute);
+}
+
+.leaderboard-hint {
+  text-align: center;
+  margin-top: 16px;
+  color: var(--c-text-dim);
+  font-size: 0.9rem;
+}
+
+/* Botão Ranking no menu */
+.menu-ranking-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-bottom: 8px;
+}
+
+.btn-rank {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 170, 0, 0.10));
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  color: #ffd700;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 10px 28px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.btn-rank:hover,
+.btn-rank:focus-visible {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 170, 0, 0.20));
+  border-color: rgba(255, 215, 0, 0.75);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.3);
+  outline: none;
+}
+
+@media (max-width: 480px) {
+  .leaderboard-entry {
+    grid-template-columns: 42px 1fr auto;
+    grid-template-rows: auto auto;
+  }
+  .leaderboard-meta {
+    grid-column: 2 / -1;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
 /* ---------- Resume banner ---------- */
 .resume-banner {
   background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(77, 111, 255, 0.12));

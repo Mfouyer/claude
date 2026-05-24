@@ -174,6 +174,38 @@
         wrongArr.sort(function (a, b) { return b.count - a.count; });
         var top5Wrong = wrongArr.slice(0, 5);
 
+        // Calcular themesCompleted e highestStreak a partir do State local
+        var localState = (window.State && typeof window.State.get === "function") ? window.State.get() : null;
+        var themesCompleted = 0;
+        var highestStreak = 0;
+        if (localState && localState.themes) {
+          var themeIds = Object.keys(localState.themes);
+          themeIds.forEach(function (tid) {
+            var t = localState.themes[tid];
+            if (t && t.victoryRoyale) themesCompleted += 1;
+            if (t && t.levels) {
+              var levelKeys = Object.keys(t.levels);
+              levelKeys.forEach(function (lk) {
+                var lv = t.levels[lk];
+                if (lv && lv.bestStreak && lv.bestStreak > highestStreak) {
+                  highestStreak = lv.bestStreak;
+                }
+              });
+            }
+          });
+        }
+
+        // Calcular rankScore
+        var totalAnswered = totalCorrect + totalWrong;
+        var accuracy = totalAnswered > 0 ? totalCorrect / totalAnswered : 0;
+        var rankScore = Math.round(
+          (totalCorrect * 10) +
+          (accuracy * 200) +
+          (themesCompleted * 150) +
+          (highestStreak * 5) -
+          (totalWrong * 2)
+        );
+
         var progressRef = s.doc(d, "progress", username);
         return s.setDoc(progressRef, {
           totalSessions:    totalSessions,
@@ -183,6 +215,9 @@
           themeStats:       themeStats,
           wrongQuestions:   top5Wrong,
           lastSession:      lastSession,
+          rankScore:        rankScore,
+          highestStreak:    highestStreak,
+          themesCompleted:  themesCompleted,
           updatedAt:        Date.now()
         });
       }).catch(function (err) {

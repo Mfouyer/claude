@@ -65,6 +65,9 @@
         </div>
         ${resumeBlock}
         <div class="theme-grid" id="theme-grid">${cards}</div>
+        <div class="menu-ranking-row">
+          <button class="btn btn-rank" id="menu-ranking">🏆 Ranking</button>
+        </div>
       </section>
     `;
 
@@ -74,6 +77,10 @@
         Router.navigate("game", { themeId: c.themeId, level: c.level, resumeIndex: c.index, queue: c.queue });
       });
     }
+
+    host.querySelector("#menu-ranking").addEventListener("click", () => {
+      Router.navigate("leaderboard");
+    });
 
     host.querySelectorAll(".theme-card").forEach(card => {
       card.addEventListener("click", () => {

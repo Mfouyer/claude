@@ -56,6 +56,7 @@
       getDocs:         fsMod.getDocs,
       setDoc:          fsMod.setDoc,
       updateDoc:       fsMod.updateDoc,
+      onSnapshot:      fsMod.onSnapshot,
       serverTimestamp: fsMod.serverTimestamp
     };
 
