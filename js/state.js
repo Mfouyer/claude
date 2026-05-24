@@ -51,8 +51,8 @@
         xp: 0,
         level: 1,
         vPoints: 50,        // brindes iniciais para comprar 1ª dica
-        lives: 5,
-        maxLives: 5,
+        lives: 10,
+        maxLives: 10,
         lastLifeRegenTs: Date.now(),
         skin: "default",
         skinsOwned: ["default"],
@@ -63,7 +63,8 @@
           picareta: 1,       // 1 dica grátis para começar
           congelante: 0,
           drone: 0
-        }
+        },
+        commitments: { livros: 0, consola: 0, telemovel: 0 }
       },
       themes,
       questionStats: {},
@@ -110,6 +111,10 @@
     s.profile.skinsOwned = Array.isArray(s.profile.skinsOwned) && s.profile.skinsOwned.length
       ? s.profile.skinsOwned
       : ["default"];
+    // Garantir que commitments existe e preserva valores existentes
+    s.profile.commitments = Object.assign(
+      {}, def.profile.commitments, s.profile.commitments || {}
+    );
     s.themes = s.themes && typeof s.themes === "object" ? s.themes : {};
     THEME_IDS.forEach((id, i) => {
       if (!s.themes[id]) s.themes[id] = defaultTheme(id, i === 0);

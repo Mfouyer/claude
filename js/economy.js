@@ -127,6 +127,13 @@
     return { ok: true };
   }
 
+  function recordCommitment(type) {
+    const p = State.getProfile();
+    if (!p.commitments) p.commitments = { livros: 0, consola: 0, telemovel: 0 };
+    p.commitments[type] = (p.commitments[type] || 0) + 1;
+    State.save();
+  }
+
   function streakBonus(streak) {
     // +V-Pts bónus se atingir certas streaks
     if (streak === 3) return { vpts: 5, label: "Em Chamas 🔥" };
@@ -142,6 +149,7 @@
     addVPoints, spendVPoints,
     buyMedKit,
     addXP, xpProgress,
-    skinIcon, streakBonus
+    skinIcon, streakBonus,
+    recordCommitment
   };
 })();

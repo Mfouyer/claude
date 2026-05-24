@@ -16,6 +16,32 @@
     return "heat-1";
   }
 
+  function halfDaysToText(n) {
+    const days = n * 0.5;
+    return days % 1 === 0 ? String(days) : days.toFixed(1).replace(".", ",");
+  }
+
+  function buildCommitmentsCard(commitments) {
+    const c = commitments || { livros: 0, consola: 0, telemovel: 0 };
+    const allZero = c.livros === 0 && c.consola === 0 && c.telemovel === 0;
+    let body = "";
+    if (allZero) {
+      body = `<p style="color:var(--c-text-mute);font-size:0.9rem;">Nenhum compromisso ainda. Continua a jogar! ✨</p>`;
+    } else {
+      const lines = [];
+      if (c.livros > 0) lines.push(`<li>📚 ${c.livros} livro(s) para ler</li>`);
+      if (c.consola > 0) lines.push(`<li>🎮 ${halfDaysToText(c.consola)} dias sem consola</li>`);
+      if (c.telemovel > 0) lines.push(`<li>📵 ${halfDaysToText(c.telemovel)} dias sem telemóvel</li>`);
+      body = `<ul style="padding-left:18px;font-size:0.9rem;line-height:1.8;">${lines.join("")}</ul>`;
+    }
+    return `
+      <article class="card" style="margin-top:12px">
+        <h3>📋 Os teus compromissos</h3>
+        ${body}
+      </article>
+    `;
+  }
+
   function render(host) {
     const overall = Progress.getOverallStats();
     const { strongest, weakest } = Progress.strongestAndWeakestTheme();
@@ -96,6 +122,8 @@
           <h3>📜 Últimas 7 respostas</h3>
           <ul>${lastList}</ul>
         </article>
+
+        ${buildCommitmentsCard(p.commitments)}
 
         <div style="margin-top:16px;text-align:center">
           <button class="btn btn-primary" id="dash-back">← Voltar ao Mapa</button>

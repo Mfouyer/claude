@@ -326,67 +326,92 @@
     showFeedback(host, ctx, correct);
   }
 
-  function showMedKitModal(host, ctx) {
-    const p = State.getProfile();
-    const canAfford = p.vPoints >= Economy.MED_KIT_PRICE;
-    // Determina se este ctx já tem uma sessão de jogo a correr (tem materialized)
-    // ou se vem do ecrã de entrada (sem sessão real iniciada)
-    const isActiveGame = !!(ctx.materialized !== undefined);
+  function halfDaysToText(n) {
+    const days = n * 0.5;
+    return days % 1 === 0 ? String(days) : days.toFixed(1).replace(".", ",");
+  }
 
-    Router.modal({
-      title: "💉 Med Kit de Emergência",
-      body: `
-        <span class="medkit-icon">💉</span>
-        <p style="text-align:center;margin-bottom:12px;">Ficaste sem vidas! O Med Kit recupera <strong>5/5 vidas</strong> e permite continuar imediatamente.</p>
-        <div style="text-align:center;margin-bottom:8px;">
-          <span class="medkit-price-tag">💎 ${Economy.MED_KIT_PRICE} V-Pontos</span>
+  function formatCommitments(commitments) {
+    const lines = [];
+    if (commitments.livros > 0) {
+      lines.push(`<p class="regen-commitment-line">📚 Já tens <strong>${commitments.livros} livro(s)</strong> para ler</p>`);
+    }
+    if (commitments.consola > 0) {
+      lines.push(`<p class="regen-commitment-line">🎮 Já tens <strong>${halfDaysToText(commitments.consola)} dias</strong> sem jogar consola</p>`);
+    }
+    if (commitments.telemovel > 0) {
+      lines.push(`<p class="regen-commitment-line">📵 Já tens <strong>${halfDaysToText(commitments.telemovel)} dias</strong> sem telemóvel</p>`);
+    }
+    return lines.join("");
+  }
+
+  function showRegenerationModal(host, ctx) {
+    const isActiveGame = !!(ctx.materialized !== undefined);
+    const p = State.getProfile();
+    const commitments = p.commitments || { livros: 0, consola: 0, telemovel: 0 };
+    const accumulatedHTML = formatCommitments(commitments);
+
+    // Criar overlay obrigatório (sem fechar ao clicar fora)
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay regen-overlay";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:200;display:flex;align-items:center;justify-content:center;";
+
+    overlay.innerHTML = `
+      <div class="modal-box regen-modal-box" style="max-width:380px;width:92%;padding:28px 24px;">
+        <div style="text-align:center;font-size:2.2rem;margin-bottom:8px;">😮</div>
+        <h2 style="text-align:center;font-size:1.1rem;margin-bottom:6px;color:var(--c-magenta,#e040fb);">Ficaste sem vidas!</h2>
+        <p style="text-align:center;font-size:0.9rem;color:var(--c-text-mute,#aaa);margin-bottom:18px;">Para continuar a jogar, faz um compromisso:</p>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+          <button class="btn btn-primary regen-choice" data-type="livros" style="font-size:1rem;padding:14px;">
+            📚 Ler um livro
+          </button>
+          <button class="btn btn-primary regen-choice" data-type="consola" style="font-size:1rem;padding:14px;">
+            🎮 Ficar meio dia sem jogar consola
+          </button>
+          <button class="btn btn-primary regen-choice" data-type="telemovel" style="font-size:1rem;padding:14px;">
+            📵 Ficar meio dia sem telemóvel
+          </button>
         </div>
-        <p style="text-align:center;font-size:0.88rem;color:var(--c-text-dim);">Tens agora: ${p.vPoints} 💎</p>
-      `,
-      extraClass: "modal-medkit",
-      buttons: [
-        canAfford
-          ? { label: "💉 Usar Med Kit — continuar!", cls: "btn-medkit", onClick: () => {
-              const r = Economy.buyMedKit();
-              if (r.ok) {
-                Router.toast("💉 Med Kit usado! Vidas restauradas.", "success");
-                Router.HUD.update();
-                if (isActiveGame) {
-                  // Continuar a pergunta actual (avança para próxima)
-                  // ctx.index já foi incrementado antes de chamar showMedKitModal a partir de advance
-                  if (ctx.index >= ctx.queue.length) {
-                    finishLevel(ctx);
-                  } else {
-                    nextQuestion(host, ctx);
-                  }
-                } else {
-                  // Vinha de render sem vidas — reinicia o jogo normalmente
-                  Router.navigate("game", {
-                    themeId: ctx.themeId, level: ctx.level,
-                    queue: ctx.queue, resumeIndex: ctx.index
-                  });
-                }
-              } else {
-                Router.toast(r.reason, "error");
-              }
-            }}
-          : { label: "💎 V-Pontos insuficientes", cls: "btn-ghost", disabled: true },
-        { label: "🛒 Visitar Loja", cls: "btn-accent", onClick: () => {
-            if (ctx.themeId && ctx.queue && ctx.queue.length > 0) {
-              State.setSession({ themeId: ctx.themeId, level: ctx.level, index: ctx.index, queue: ctx.queue }, "game");
-            }
-            Router.navigate("shop");
-          }
-        },
-        { label: "🗺️ Ir ao Mapa", cls: "btn-ghost", onClick: () => {
-            if (ctx.themeId && ctx.queue && ctx.queue.length > 0) {
-              State.setSession({ themeId: ctx.themeId, level: ctx.level, index: ctx.index, queue: ctx.queue }, "game");
-            }
-            Router.navigate("menu");
-          }
+
+        ${accumulatedHTML ? `
+        <div class="regen-accumulated" style="background:rgba(255,255,255,0.05);border-radius:8px;padding:12px 14px;font-size:0.85rem;color:var(--c-text-mute,#aaa);">
+          <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:var(--c-text-mute,#888);">Compromissos acumulados</div>
+          ${accumulatedHTML}
+        </div>` : ""}
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    function onChoice(type) {
+      Economy.recordCommitment(type);
+      Economy.restoreAllLives();
+      Router.HUD.update();
+      overlay.remove();
+
+      if (isActiveGame) {
+        if (ctx.index >= ctx.queue.length) {
+          finishLevel(ctx);
+        } else {
+          nextQuestion(host, ctx);
         }
-      ]
+      } else {
+        Router.navigate("game", {
+          themeId: ctx.themeId, level: ctx.level,
+          queue: ctx.queue, resumeIndex: ctx.index
+        });
+      }
+    }
+
+    overlay.querySelectorAll(".regen-choice").forEach(btn => {
+      btn.addEventListener("click", () => onChoice(btn.dataset.type), { once: true });
     });
+  }
+
+  // Mantida para compatibilidade com shop.js e usos directos da loja
+  function showMedKitModal(host, ctx) {
+    showRegenerationModal(host, ctx);
   }
 
   function showFeedback(host, ctx, correct) {
@@ -402,23 +427,23 @@
     const livesAfter = State.getProfile().lives;
     const next = host.querySelector("#next-q");
 
-    // Sem vidas após erro: abre modal Med Kit directamente sem esperar "Próxima"
+    // Sem vidas após erro: abre modal de regeneração directamente sem esperar "Próxima"
     if (!correct && livesAfter === 0) {
       // Incrementar index agora (equivalente ao que advance faria)
       ctx.index += 1;
-      let medkitModalOpened = false;
-      function openMedKit() {
-        if (medkitModalOpened) return;
-        medkitModalOpened = true;
-        showMedKitModal(host, ctx);
+      let regenModalOpened = false;
+      function openRegen() {
+        if (regenModalOpened) return;
+        regenModalOpened = true;
+        showRegenerationModal(host, ctx);
       }
       next.hidden = false;
-      next.textContent = "💉 Med Kit →";
+      next.textContent = "😮 Escolher compromisso →";
       next.classList.add("btn-medkit");
       next.focus();
-      next.addEventListener("click", openMedKit, { once: true });
+      next.addEventListener("click", openRegen, { once: true });
       // Abre automaticamente após breve pausa para o jogador ver o feedback
-      setTimeout(openMedKit, 900);
+      setTimeout(openRegen, 900);
       return;
     }
 
@@ -430,9 +455,9 @@
   function advance(host, ctx) {
     ctx.index += 1;
     if (State.getProfile().lives === 0) {
-      // Sem vidas: abrir modal Med Kit (já foi salvo o estado se vier de showMedKitModal)
+      // Sem vidas: abrir modal de regeneração
       clearTimer();
-      showMedKitModal(host, ctx);
+      showRegenerationModal(host, ctx);
       return;
     }
     if (ctx.index >= ctx.queue.length) {
@@ -491,14 +516,14 @@
     // Verificar vidas
     Economy.regenLives();
     if (State.getProfile().lives === 0) {
-      // Usar um ctx temporário para o modal Med Kit (com os params passados)
+      // Usar um ctx temporário para o modal de regeneração (com os params passados)
       const tempCtx = {
         themeId: params ? params.themeId : null,
         level: params ? params.level : null,
         index: params ? (params.resumeIndex || 0) : 0,
         queue: params ? (params.queue || []) : []
       };
-      showMedKitModal(host, tempCtx);
+      showRegenerationModal(host, tempCtx);
       return;
     }
 
