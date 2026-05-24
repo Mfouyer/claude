@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060f" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>MatemáticaRoyale — Painel do Pai</title>
+  <!-- Fontes cyberpunk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/login.css" />
+  <link rel="stylesheet" href="styles/admin.css" />
+</head>
+<body>
+  <div class="admin-root">
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <h1 class="admin-title">⚙ PAINEL DO PAI</h1>
+        <a href="index.html" class="btn btn-ghost" style="font-size:0.8rem;padding:8px 14px;">← Jogo</a>
+      </div>
+    </header>
+
+    <main id="admin-main">
+      <!-- Conteúdo montado pelo admin.js -->
+    </main>
+  </div>
+
+  <!-- Toast host (reutilizado para feedback de ações admin) -->
+  <div id="toast-host" class="toast-host" aria-live="polite"></div>
+
+  <!-- Firebase (module) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, doc, collection, query, where, orderBy, limit,
+      getDoc, getDocs, setDoc, updateDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqN1ErjgBALaSkktl-SvldXJdR4Nmw5OA",
+      authDomain: "matematica-royale.firebaseapp.com",
+      projectId: "matematica-royale",
+      storageBucket: "matematica-royale.firebasestorage.app",
+      messagingSenderId: "367681819550",
+      appId: "1:367681819550:web:66c0811a50231cff293c8f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    window._FirebaseDB = db;
+    window._FirestoreSDK = {
+      doc, collection, query, where, orderBy, limit,
+      getDoc, getDocs, setDoc, updateDoc, serverTimestamp
+    };
+
+    // Sinalizar que Firebase está pronto
+    if (window._adminFirebaseResolve) {
+      window._adminFirebaseResolve(db);
+    }
+    window._FirebaseDB = db;
+
+    // Disparar evento para admin.js
+    window.dispatchEvent(new CustomEvent("firebase-ready", { detail: db }));
+  </script>
+
+  <!-- Admin script (carregado como classic para aceder a globals) -->
+  <script>
+    // Cria a promise FirebaseReady para compatibilidade com admin.js
+    window.FirebaseReady = new Promise(function (resolve) {
+      window._adminFirebaseResolve = resolve;
+      window.addEventListener("firebase-ready", function (e) {
+        resolve(e.detail);
+      }, { once: true });
+    });
+  </script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

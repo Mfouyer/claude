@@ -23,6 +23,7 @@
             ${hasProgress ? "🗺️ Ir para o mapa" : "🎮 Começar Aventura"}
           </button>
           ${hasProgress ? `<button class="btn btn-ghost" id="splash-reset">⚠️ Recomeçar do zero</button>` : ""}
+          <button class="btn btn-ghost" id="splash-logout" style="margin-top:8px;font-size:0.82rem;color:var(--c-text-mute);">Sair da conta</button>
         </div>
         <p class="splash-info">Geometria — 5º ano — Areal Editores (MSI 5 P2)</p>
       </section>
@@ -35,6 +36,18 @@
       });
     }
     host.querySelector("#splash-start").addEventListener("click", () => Router.navigate("menu"));
+
+    const logoutBtn = host.querySelector("#splash-logout");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        if (window.FirebaseAuth) {
+          FirebaseAuth.logout();
+        } else {
+          Router.navigate("login");
+        }
+      });
+    }
+
     const resetBtn = host.querySelector("#splash-reset");
     if (resetBtn) {
       resetBtn.addEventListener("click", () => {

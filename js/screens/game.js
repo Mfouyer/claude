@@ -284,6 +284,11 @@
     // Atualizar estatísticas
     Progress.recordAnswer(ctx.themeId, ctx.level, ctx.materialized.qId, correct);
 
+    // Firebase: registar resposta
+    if (window.FirebaseSync) {
+      FirebaseSync.recordAnswer(correct, ctx.materialized.prompt || ctx.materialized.qId, ctx.themeId);
+    }
+
     // Economia
     if (correct) {
       ctx.correct += 1;
@@ -440,6 +445,9 @@
   function finishLevel(ctx) {
     Progress.markLevelDone(ctx.themeId, ctx.level);
     State.clearSession();
+
+    // Firebase: terminar sessão
+    if (window.FirebaseSync) FirebaseSync.endSession();
     const ls = State.getLevelStats(ctx.themeId, ctx.level);
     const theme = State.getTheme(ctx.themeId);
     const justRoyale = theme.victoryRoyale; // pode ter sido marcado agora
@@ -511,6 +519,13 @@
       materialized: null
     };
     _state = ctx;
+
+    // Firebase: iniciar sessão
+    if (window.FirebaseSync && window.FirebaseAuth) {
+      const u = window.FirebaseAuth.currentUser();
+      if (u) FirebaseSync.startSession(u.username, params.themeId);
+    }
+
     nextQuestion(host, ctx);
   }
 

@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  function start() {
+  function startGame() {
     // Inicializa o estado, regenera vidas
     Economy.regenLives();
     State.save();
@@ -15,12 +15,24 @@
       || Object.values(s.themes).some(t => Object.values(t.levels).some(lv => lv.tried > 0));
 
     if (hasProgress) {
-      // Mostrar splash com botão "Continuar"
       Router.navigate("splash", { hasProgress: true });
     } else {
-      // 1ª vez — splash de boas-vindas
       Router.navigate("splash", { hasProgress: false });
     }
+  }
+
+  // Expor para que o ecrã de login possa chamar após login com sucesso
+  window.AppStart = startGame;
+
+  function start() {
+    // Verificar se utilizador está autenticado
+    const user = window.FirebaseAuth ? window.FirebaseAuth.currentUser() : null;
+    if (!user) {
+      // Mostrar ecrã de login
+      Router.navigate("login");
+      return;
+    }
+    startGame();
   }
 
   if (document.readyState === "loading") {

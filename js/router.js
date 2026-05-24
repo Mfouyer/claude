@@ -24,7 +24,7 @@
     }
     h.innerHTML = "";
     HUD.update();
-    HUD.toggle(name !== "splash");
+    HUD.toggle(name !== "splash" && name !== "login");
     window.Screens[name].render(h, params);
 
     // Sessão: se for ecrã de jogo, marca, senão não
