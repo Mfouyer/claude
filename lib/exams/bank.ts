@@ -1,5 +1,7 @@
-// AUTO-GENERATED from the real question pool + authored answer keys.
-// Do not edit by hand — see _source/gen_bank.py.  Server-side only.
+// Question bank for AB-730 / AB-731 — the real question pool plus the authored
+// answer key and explanations. This file is the source of truth: edit questions,
+// correct answers, or explanations directly here. Options must stay sorted A→D.
+// Server-side only (imported via "server-only") so answers never reach the browser.
 import "server-only";
 import type { Question } from "./types";
 

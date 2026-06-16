@@ -50,12 +50,19 @@ repo.
 
 ## Editing the question bank
 
-`lib/exams/bank.ts` is generated. To change questions/answers, edit
-`_source/gen_bank.py` (the authored answer keys + the 3 new AB-731 questions live
-there) and regenerate:
+All questions, correct answers and explanations live in **`lib/exams/bank.ts`**
+— a plain typed array. Edit it directly to add, remove or fix a question. Each
+entry looks like:
 
-```bash
-python3 _source/gen_bank.py
+```ts
+{
+  id: "GEN-118", exam: "ab731", domain: "generative-ai-fundamentals",
+  subtopic: "rag-grounding", format: "scenario", difficulty: "medium",
+  stem: "…",
+  options: [ { key: "A", text: "…" }, … ],   // keep sorted A → B → C → D
+  correct: ["B"],                             // for yes/no use `answers: { "1": true }`
+  explanation: "Why B is right and the others are not.",
+}
 ```
 
-> `_source/` holds the raw question data + generator and is git-ignored.
+The file is imported server-side only, so answers are never sent to the browser.
